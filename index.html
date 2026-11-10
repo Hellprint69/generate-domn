@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bulk URL Domain Replacer</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    textarea, select, input { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen py-10 px-4">
+  <div class="max-w-4xl mx-auto space-y-6">
+    
+    <!-- Header -->
+    <header class="text-center space-y-2">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
+        URL Tools
+      </div>
+      <h1 class="text-3xl font-bold tracking-tight text-white">Bulk Domain Replacer</h1>
+      <p class="text-slate-400 text-sm max-w-lg mx-auto">
+        Ganti hostname/domain URL secara massal sambil mempertahankan slug, path, query string, dan hash secara otomatis.
+      </p>
+    </header>
+
+    <!-- Main Card -->
+    <main class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 shadow-xl backdrop-blur-sm space-y-6">
+      
+      <!-- Domain Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end bg-slate-900/60 p-4 rounded-xl border border-slate-700/50">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            Pilih Target Domain
+          </label>
+          <select id="domainSelect" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <!-- Sesuaikan opsi domain di sini -->
+            <option value="https://vimovs.site">Domain vimovs1 (https://vimovs.site)</option>
+            <option value="https://vimfun.site">Domain vimfun3 (https://vimfun.site)</option>
+            <option value="https://slacevd.site">Domain slacevd2 (https://slacevd.site)</option>
+            <option value="https://acmgs.site">Domain acmgs (https://acmgs.site)</option>
+            <option value="custom">-- Ketik Domain Kustom Sendiri --</option>
+          </select>
+        </div>
+
+        <div id="customDomainWrapper" class="hidden">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            Domain Baru (Kustom)
+          </label>
+          <input type="text" id="customDomainInput" placeholder="https://domain-baru.com" 
+                 class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <!-- Input URLs -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            Input URL Asal (1 baris 1 link)
+          </label>
+          <button type="button" id="loadSampleBtn" class="text-xs text-blue-400 hover:text-blue-300 transition">
+            Isi Contoh
+          </button>
+        </div>
+        <textarea id="inputUrls" rows="6" placeholder="https://vimovs.site/v/i0g1zhwj1&#10;https://vimovs.site/v/AvJQgWXV1&#10;https://vimovs.site/v/ZTRtcdDR1" 
+                  class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
+      </div>
+
+      <!-- Action Button -->
+      <button type="button" id="generateBtn" 
+              class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 active:scale-[0.99] text-white text-sm font-semibold rounded-xl shadow-lg shadow-blue-600/20 transition flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Generate URL Baru
+      </button>
+
+      <!-- Output URLs -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            Hasil URL Baru
+          </label>
+          <button type="button" id="copyBtn" class="text-xs text-emerald-400 hover:text-emerald-300 transition flex items-center gap-1 font-medium">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            <span id="copyBtnText">Salin Semua</span>
+          </button>
+        </div>
+        <textarea id="outputUrls" rows="6" readonly placeholder="Hasil generate akan muncul di sini..." 
+                  class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl p-3.5 text-xs text-emerald-400 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 leading-relaxed"></textarea>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const domainSelect = document.getElementById('domainSelect');
+    const customDomainWrapper = document.getElementById('customDomainWrapper');
+    const customDomainInput = document.getElementById('customDomainInput');
+    const inputUrls = document.getElementById('inputUrls');
+    const outputUrls = document.getElementById('outputUrls');
+    const generateBtn = document.getElementById('generateBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const copyBtnText = document.getElementById('copyBtnText');
+    const loadSampleBtn = document.getElementById('loadSampleBtn');
+
+    // Toggle custom domain input
+    domainSelect.addEventListener('change', () => {
+      if (domainSelect.value === 'custom') {
+        customDomainWrapper.classList.remove('hidden');
+        customDomainInput.focus();
+      } else {
+        customDomainWrapper.classList.add('hidden');
+      }
+    });
+
+    // Generate Replacement
+    generateBtn.addEventListener('click', () => {
+      let targetDomain = domainSelect.value === 'custom' ? customDomainInput.value.trim() : domainSelect.value;
+
+      if (!targetDomain) {
+        alert('Silakan pilih atau isi domain tujuan.');
+        return;
+      }
+
+      // Pastikan ada protokol http/https
+      if (!/^https?:\/\//i.test(targetDomain)) {
+        targetDomain = 'https://' + targetDomain;
+      }
+      // Hapus trailing slash jika ada
+      targetDomain = targetDomain.replace(/\/+$/, '');
+
+      const lines = inputUrls.value.split(/\r?\n/);
+      const results = [];
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+
+        try {
+          // Parse URL asli menggunakan native URL browser parser
+          const parsed = new URL(/^https?:\/\//i.test(trimmed) ? trimmed : 'https://' + trimmed);
+          
+          // Gabungkan domain target dengan path, query param (?id=...), dan hash (#...) asli
+          const fullPath = parsed.pathname + parsed.search + parsed.hash;
+          results.push(`${targetDomain}${fullPath}`);
+        } catch (e) {
+          // Fallback regex jika URL tidak valid
+          const slugMatch = trimmed.match(/^https?:\/\/[^\/]+(\/.*)$/i);
+          if (slugMatch) {
+            results.push(`${targetDomain}${slugMatch[1]}`);
+          } else {
+            results.push(trimmed); // biarkan jika formatnya rusak
+          }
+        }
+      });
+
+      outputUrls.value = results.join('\n');
+    });
+
+    // Salin ke Clipboard
+    copyBtn.addEventListener('click', async () => {
+      if (!outputUrls.value.trim()) return;
+      try {
+        await navigator.clipboard.writeText(outputUrls.value);
+        copyBtnText.textContent = 'Tersalin!';
+        setTimeout(() => {
+          copyBtnText.textContent = 'Salin Semua';
+        }, 2000);
+      } catch (err) {
+        outputUrls.select();
+        document.execCommand('copy');
+      }
+    });
+
+    // Isi contoh cepat
+    loadSampleBtn.addEventListener('click', () => {
+      inputUrls.value = 
+`https://vimovs.site/v/i0g1zhwj1
+https://vimovs.site/v/AvJQgWXV1
+https://vimovs.site/v/ZTRtcdDR1`;
+    });
+  </script>
+</body>
+</html>
